@@ -73,3 +73,4 @@ def send_message(message):
 
 # Запуск бота
 bot.polling()
+# send_message("слыщмите меня бандерлоги?")
