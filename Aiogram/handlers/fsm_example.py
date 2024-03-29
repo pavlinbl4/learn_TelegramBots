@@ -99,11 +99,6 @@ async def process_good_category(message: Message, state: FSMContext) -> None:
     )
 
 
-# @form_router.message(Form.confirm)
-# async def process_unknown_write_bots(message: Message) -> None:
-#     await message.reply("I don't understand you :(")
-
-
 @form_router.message(Form.caption)
 async def process_caption(message: Message, state: FSMContext) -> None:
     data = await state.update_data(caption=message.text)
@@ -114,13 +109,16 @@ async def process_caption(message: Message, state: FSMContext) -> None:
 async def show_summary(message: Message, data: Dict[str, Any], positive: bool = True) -> None:
     name = data["name"]
     caption = data.get("caption"
+
                        )
-    text = f"Категория - *{name}*\n"
-    text += (
-        f"_описание съемки_: *{caption}*"
-        if positive
-        else "_ошибки бывают у всех_"
-    )
+
+    if positive:
+        text = f"Категория - *{name}*\n"
+        text += f"_описание съемки_: *{caption}*\n"
+        text += "*Заявка на съемку создается*"
+    else:
+        text = "_ошибки бывают у всех_"
+
     await message.answer(text=text, reply_markup=ReplyKeyboardRemove())
 
 
