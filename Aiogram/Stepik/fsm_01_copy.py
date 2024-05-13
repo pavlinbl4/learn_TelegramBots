@@ -1,4 +1,6 @@
 from aiogram import Bot, Dispatcher, F, types
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state, State, StatesGroup
@@ -17,7 +19,7 @@ ALLOWED_USER_IDS = {123456789, 987654321, 1237220337, 187597961}
 storage = MemoryStorage()
 
 # Создаем объекты бота и диспетчера
-bot = Bot(TOKEN)
+bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 
 
@@ -100,7 +102,7 @@ async def handle_allowed_user_messages(message: types.Message, state: FSMContext
             await message.answer(f"Hello, {hbold(message.from_user.full_name)}\n"
                                  f"вы загрузили файл - {uploaded_file.file_name} \n"
                                  f"теперь укажите автора/правообладателя снимка")
-            ic(f'path to uploading image : ../DownloadedFiles/{uploaded_file.file_name}.jpg')
+            # ic(f'path to uploading image : ../DownloadedFiles/{uploaded_file.file_name}.jpg')
 
             # Устанавливаем состояние ожидания ввода автора фото
             await state.set_state(FSMFillForm.add_credit)
@@ -129,16 +131,19 @@ async def process_name_sent(message: Message, state: FSMContext):
     # сохраняем введенное имя в хранилище по ключу "credit"
     await state.update_data(caption=message.text)
     data = await state.get_data()
-    await message.answer(f'{data["caption"]}')
+    # await message.answer(f'{data["caption"]}')
     await message.answer(text='Спасибо!\n\nВ ближайшее время вам поступит id снимка')
     # Устанавливаем состояние ожидания ввода описания
     # await state.set_state(FSMFillForm.add_caption)
     await state.clear()
+    ic(f'{data["caption"]}\n{data["credit"]}')
 
 
-@dp.message(StateFilter(FSMFillForm.add_file))
+@dp.message(Command(commands='add_image'), StateFilter(default_state))
 async def handle_other_messages(message: types.Message):
     # This function will be called for messages from any other user
+    with open('users.txt','a') as txt_user_base:
+        txt_user_base.write(f'{message.from_user.full_name} - {message.from_user.id}\n')
     await message.answer(f"Извините, {hbold(message.from_user.full_name)}\n"
                          f"это частный бот и вы не включены в"
                          f"список пользователей .")
