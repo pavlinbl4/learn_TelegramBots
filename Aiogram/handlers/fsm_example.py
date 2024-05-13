@@ -1,11 +1,9 @@
 import asyncio
 import logging
 import sys
-import types
-from os import getenv
 from typing import Any, Dict
 
-from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
@@ -20,8 +18,6 @@ from aiogram.types import (
 
 from Aiogram.keyboards import kp_keyboard
 from get_credentials import Credentials
-
-TOKEN = getenv("BOT_TOKEN")
 
 form_router = Router()
 
@@ -123,8 +119,8 @@ async def show_summary(message: Message, data: Dict[str, Any], positive: bool = 
 
 
 async def main():
-    TOKEN = Credentials().pavlinbl4_bot
-    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
+    bot = Bot(token=Credentials().pavlinbl4_bot,
+              default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
     dp = Dispatcher()
     dp.include_router(form_router)
 

@@ -1,17 +1,20 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import ContentType
 import asyncio
-from aiogram.types import Message
-from get_credentials import Credentials
-
-token = Credentials().crazypythonbot
-
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from Aiogram.core.handlers.basic import get_start, get_photo
+from Aiogram.core.settings import settings
+from aiogram.filters import Command
+import Aiogram.core.keyboards.keyboard_1 as kb
 
 async def start_bot(bot: Bot):
-    await bot.send_message(187597961, text="I am working Boss")
+    await bot.send_message(settings.bots.admin_id, text="__I am working Boss__",
+                           reply_markup=kb.settings)
 
 
 async def stop_bot(bot: Bot):
-    await bot.send_message(187597961, text="Bot stoped")
+    await bot.send_message(settings.bots.admin_id, text="Bot stopped")
 
 
 async def get_start(message: Message, bot: Bot):
@@ -19,14 +22,15 @@ async def get_start(message: Message, bot: Bot):
     await message.answer(f' Hy ! {message.from_user.first_name}')
     await message.reply(f' Hy ! {message.from_user.first_name}')
 
-
 async def start():
-    bot = Bot(token=token)
+    bot = Bot(token=settings.bots.bot_token,
+              default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN))
 
     dp = Dispatcher()
     dp.startup.register(start_bot)
     dp.shutdown.register(stop_bot)
-    dp.message.register(get_start)
+    dp.message.register(get_photo, F.content_type == ContentType.PHOTO)
+    dp.message.register(get_start, Command(commands=['start', 'run']))
 
     try:
         await dp.start_polling(bot)
