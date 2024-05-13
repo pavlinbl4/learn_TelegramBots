@@ -8,6 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (Message)
 from aiogram.utils.markdown import hbold
 from icecream import ic
+from Aiogram.common.bot_commands_list import kp_uploader
 
 from get_credentials import Credentials
 
@@ -21,6 +22,10 @@ storage = MemoryStorage()
 # Создаем объекты бота и диспетчера
 bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
+
+
+async def set_main_menu(bot: Bot):
+    await bot.set_my_commands(commands=kp_uploader)
 
 
 # создаем класс, наследуемый от StatesGroup, для группы состояний нашей FSM
@@ -142,7 +147,7 @@ async def process_name_sent(message: Message, state: FSMContext):
 @dp.message(Command(commands='add_image'), StateFilter(default_state))
 async def handle_other_messages(message: types.Message):
     # This function will be called for messages from any other user
-    with open('users.txt','a') as txt_user_base:
+    with open('users.txt', 'a') as txt_user_base:
         txt_user_base.write(f'{message.from_user.full_name} - {message.from_user.id}\n')
     await message.answer(f"Извините, {hbold(message.from_user.full_name)}\n"
                          f"это частный бот и вы не включены в"
@@ -172,4 +177,9 @@ async def handle_other_messages_2(message: types.Message):
 
 # start polling
 if __name__ == '__main__':
+    async def set_main_menu(bot: bot):
+        await bot.set_my_commands(commands=kp_uploader)
+
+
+    dp.startup.register(set_main_menu)
     dp.run_polling(bot)
