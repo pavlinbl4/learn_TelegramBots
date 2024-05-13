@@ -3,12 +3,11 @@ from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state, State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import (CallbackQuery, InlineKeyboardButton,
-                           InlineKeyboardMarkup, Message, PhotoSize)
-
-from get_credentials import Credentials
+from aiogram.types import (Message)
 from aiogram.utils.markdown import hbold
 from icecream import ic
+
+from get_credentials import Credentials
 
 # Configuration
 TOKEN = Credentials().pavlinbl4_bot
@@ -20,9 +19,6 @@ storage = MemoryStorage()
 # Создаем объекты бота и диспетчера
 bot = Bot(TOKEN)
 dp = Dispatcher(storage=storage)
-
-# Создаем "базу данных" пользователей
-user_dict: dict[int, dict[str, str | int | bool]] = {}
 
 
 # создаем класс, наследуемый от StatesGroup, для группы состояний нашей FSM
@@ -78,9 +74,7 @@ async def handle_allowed_user_messages(message: types.Message, state: FSMContext
     else:
         uploaded_file = message.document
         file_id = uploaded_file.file_id
-        # ic(uploaded_file)
 
-        # get file path
         file = await bot.get_file(file_id)
         file_path = file.file_path
 
@@ -108,11 +102,9 @@ async def handle_allowed_user_messages(message: types.Message, state: FSMContext
             await state.set_state(FSMFillForm.add_file)
 
 
-
-
 # handler будет срабатывать, если введено корректное имя
 # и переводить в состояние ожидания ввода описания
-@dp.message(StateFilter(FSMFillForm.add_credit))
+@dp.message(StateFilter(FSMFillForm.add_credit), F.text.len() > 3)
 async def process_name_sent(message: Message, state: FSMContext):
     # сохраняем введенное имя в хранилище по ключу "credit"
     await state.update_data(credit=message.text)
@@ -121,29 +113,25 @@ async def process_name_sent(message: Message, state: FSMContext):
     await state.set_state(FSMFillForm.add_caption)
 
 
-# handler будет срабатывать, если во время ввода имени
-# будет введено что-то некорректное
-@dp.message(StateFilter(FSMFillForm.add_credit))
-async def warning_not_name(message: Message):
-    await message.answer(
-        text='То, что вы отправили не похоже на имя\n\n'
-             'Пожалуйста, введите ваше имя\n\n'
-             'Если вы хотите прервать заполнение анкеты - '
-             'отправьте команду /cancel'
-    )
+# handler будет срабатывать, если введено корректное имя
+# и переводить в состояние ожидания ввода описания
+@dp.message(StateFilter(FSMFillForm.add_caption), F.text.len() > 3)
+async def process_name_sent(message: Message, state: FSMContext):
+    # сохраняем введенное имя в хранилище по ключу "credit"
+    await state.update_data(caption=message.text)
+    data = await state.get_data()
+    await message.answer(f'{data["caption"]}')
+    await message.answer(text='Спасибо!\n\nВ ближайшее время вам поступит id снимка')
+    # Устанавливаем состояние ожидания ввода описания
+    await state.set_state(FSMFillForm.add_caption)
 
 
-# handler будет срабатывать на любые сообщения, кроме тех
-# для которых есть отдельные хэндлеры, вне состояний
 @dp.message(StateFilter(default_state))
-async def send_echo(message: Message):
-    await message.reply(text='Извините, моя твоя не понимать')
-
-
-@dp.message()
 async def handle_other_messages(message: types.Message):
     # This function will be called for messages from any other user
-    await message.reply("Sorry, you are not an allowed user.")
+    await message.answer(f"Извините, {hbold(message.from_user.full_name)}\n"
+                         f"это частный бот и вы не включены в"
+                         f"список пользователей .")
 
 
 # start polling
