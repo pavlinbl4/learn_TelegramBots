@@ -41,6 +41,14 @@ async def process_start_command(message: Message):
              'отправьте команду /add_image'
     )
 
+@dp.message(Command(commands='help'), StateFilter(default_state))
+async def process_start_command(message: Message):
+    await message.answer(
+        text='Этот бот помогает добавлять фото в архив\n\n'
+             'Чтобы перейти к отправке фото - '
+             'отправьте команду /add_image'
+    )
+
 
 # handler будет срабатывать на команду "/cancel" в любых состояниях,
 @dp.message(Command(commands='cancel'))
@@ -123,15 +131,27 @@ async def process_name_sent(message: Message, state: FSMContext):
     await message.answer(f'{data["caption"]}')
     await message.answer(text='Спасибо!\n\nВ ближайшее время вам поступит id снимка')
     # Устанавливаем состояние ожидания ввода описания
-    await state.set_state(FSMFillForm.add_caption)
+    # await state.set_state(FSMFillForm.add_caption)
+    await state.clear()
 
 
-@dp.message(StateFilter(default_state))
+@dp.message(StateFilter(FSMFillForm.add_file))
 async def handle_other_messages(message: types.Message):
     # This function will be called for messages from any other user
     await message.answer(f"Извините, {hbold(message.from_user.full_name)}\n"
                          f"это частный бот и вы не включены в"
                          f"список пользователей .")
+
+
+# handler будет срабатывать, если введено корректное имя
+# и переводить в состояние ожидания ввода описания
+@dp.message(StateFilter(FSMFillForm.add_credit), F.text.len() < 3)
+async def process_name_sent(message: Message, state: FSMContext):
+    # сохраняем введенное имя в хранилище по ключу "credit"
+    await state.update_data(credit=message.text)
+    await message.answer(text='текст не может быть короче 3 букв')
+    # Устанавливаем состояние ожидания ввода возраста
+    await state.set_state(FSMFillForm.add_credit)
 
 
 # start polling
