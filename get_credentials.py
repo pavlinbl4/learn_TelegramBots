@@ -12,8 +12,11 @@ class Credentials:
         self.crazypythonbot = os.getenv('CRAZYPYTHONBOT')
         self.pavlinbl4_bot = os.getenv('PAVLINBL4_BOT')
         self.admin = os.getenv('ADMIN_ID')
+        self.pxp_login = os.getenv('PXP_LOGIN')
+        self.pxp_password = os.getenv('PXP_PASSWORD')
         
 
 
 if __name__ == '__main__':
     assert Credentials().admin == '187597961'
+    assert Credentials().pxp_login == 'pavlenko.evgeniy@gmail.com'

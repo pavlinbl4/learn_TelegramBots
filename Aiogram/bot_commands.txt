@@ -1,0 +1,5 @@
+start - Start the bot
+menu - It is menu
+shipping - Delivery!
+payment - Your money - our money
+about - I'll tell you story

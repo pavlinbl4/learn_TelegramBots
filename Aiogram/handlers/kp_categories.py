@@ -19,6 +19,7 @@ class ShootCreation(StatesGroup):
     confirm_caption = State()
 
 
+# start router and select category
 @user_categories_router.message(StateFilter(None), CommandStart())
 async def start_cmd(message: types.Message, state: FSMContext):
     logger.info(message.text)
