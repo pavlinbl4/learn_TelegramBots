@@ -10,7 +10,7 @@ from icecream import ic
 from get_credentials import Credentials
 
 # Configuration
-TOKEN = Credentials().pavlinbl4_bot
+TOKEN = Credentials().contraption_bot
 ALLOWED_USER_IDS = {123456789, 987654321, 1237220337, 187597961}
 
 # Инициализируем хранилище (создаем экземпляр класса MemoryStorage)
@@ -41,11 +41,12 @@ async def process_start_command(message: Message):
              'отправьте команду /add_image'
     )
 
+
 @dp.message(Command(commands='help'), StateFilter(default_state))
 async def process_start_command(message: Message):
     await message.answer(
         text='Этот бот помогает добавлять фото в архив\n\n'
-             'Чтобы перейти к отправке фото - '
+             'Чтобы перейти к отправке фото\n'
              'отправьте команду /add_image'
     )
 
@@ -55,7 +56,7 @@ async def process_start_command(message: Message):
 async def process_cancel_command_state(message: Message, state: FSMContext):
     await message.answer(
         text='Вы прервали работу\n\n'
-             'Чтобы вернуться к загрузке фото - '
+             'Чтобы вернуться к загрузке фото -\n '
              'отправьте команду /add_image'
     )
     # Сбрасываем состояние и очищаем данные, полученные внутри состояний
@@ -97,7 +98,7 @@ async def handle_allowed_user_messages(message: types.Message, state: FSMContext
 
             # send message to sender
             await message.answer(f"Hello, {hbold(message.from_user.full_name)}\n"
-                                 f"вы загрузили файл - {uploaded_file.file_name} "
+                                 f"вы загрузили файл - {uploaded_file.file_name} \n"
                                  f"теперь укажите автора/правообладателя снимка")
             ic(f'path to uploading image : ../DownloadedFiles/{uploaded_file.file_name}.jpg')
 
@@ -105,7 +106,7 @@ async def handle_allowed_user_messages(message: types.Message, state: FSMContext
             await state.set_state(FSMFillForm.add_credit)
 
         else:
-            await message.answer(f"Вы отправили недопустимый тип файла - {uploaded_file.mime_type}\n"
+            await message.answer(f"Вы отправили недопустимый тип файла\n"
                                  f"я работаю только с фотографиями")
             await state.set_state(FSMFillForm.add_file)
 
@@ -152,6 +153,16 @@ async def process_name_sent(message: Message, state: FSMContext):
     await message.answer(text='текст не может быть короче 3 букв')
     # Устанавливаем состояние ожидания ввода возраста
     await state.set_state(FSMFillForm.add_credit)
+
+
+@dp.message(StateFilter(default_state))
+async def handle_other_messages_2(message: types.Message):
+    # This function will be called for messages from any other user
+    await message.answer(f"{hbold(message.from_user.full_name)}\n"
+                         f"для начала работы\n"
+                         f"отправьте команду /start\n"
+                         f"Чтобы загрузить фото\n"
+                         f"отправьте команду /add_image\n")
 
 
 # start polling
