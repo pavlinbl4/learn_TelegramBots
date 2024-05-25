@@ -5,15 +5,15 @@ from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state, State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import (Message)
+from aiogram.types import Message
 from aiogram.utils.markdown import hbold
 from icecream import ic
 from Aiogram.common.bot_commands_list import kp_uploader
+from Aiogram.kp_photo_uploader_bot.check_existing_file import create_dir
 
 from get_credentials import Credentials
 
-# Configuration
-TOKEN = Credentials().contraption_bot
+TOKEN = Credentials().pavlinbl4_bot
 ALLOWED_USER_IDS = {123456789, 987654321, 1237220337, 187597961}
 
 # Инициализируем хранилище (создаем экземпляр класса MemoryStorage)
@@ -24,18 +24,14 @@ bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 
 
-async def set_main_menu(bot: Bot):
-    await bot.set_my_commands(commands=kp_uploader)
-
-
-# создаем класс, наследуемый от StatesGroup, для группы состояний нашей FSM
 class FSMFillForm(StatesGroup):
-    # Создаем экземпляры класса State, последовательно
-    # перечисляя возможные состояния, в которых будет находиться
-    # бот в разные моменты взаимодействия с пользователем
     add_file = State()  # Состояние ожидания добавления файла
     add_credit = State()  # Состояние ожидания ввода image credit
     add_caption = State()  # Состояние ожидания выбора image caption
+
+
+async def set_main_menu(bot: Bot):
+    await bot.set_my_commands(commands=kp_uploader)
 
 
 # handler будет срабатывать на команду /start вне состояний
@@ -99,9 +95,11 @@ async def handle_allowed_user_messages(message: types.Message, state: FSMContext
                               }
 
         if uploaded_file.mime_type in allowed_files_type:
+            # create dir
+            uploaded_images = create_dir("Uploaded_images")
 
             # save file to hdd
-            await bot.download_file(file_path, f"DownloadedFiles/{uploaded_file.file_name}.jpg")
+            await bot.download_file(file_path, f"{uploaded_images}/{uploaded_file.file_name}.jpg")
 
             # send message to sender
             await message.answer(f"Hello, {hbold(message.from_user.full_name)}\n"
