@@ -9,7 +9,7 @@ from aiogram.types import Message
 from aiogram.utils.markdown import hbold
 from icecream import ic
 from Aiogram.common.bot_commands_list import kp_uploader
-from Aiogram.kp_photo_uploader_bot.check_existing_file import create_dir
+from kp_photo_uploader_bot.check_existing_file import create_dir
 
 from get_credentials import Credentials
 
